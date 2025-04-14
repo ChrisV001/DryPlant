@@ -48,14 +48,14 @@ function CircularProgress({
   });
 
   return (
-    <View>
-      <View>
-        <Text>{Math.round(progress)}%</Text>
-        <Text>
+    <View style={styles.progressContainer}>
+      <View style={styles.progressTextContainer}>
+        <Text style={styles.progressPercentage}>{Math.round(progress)}%</Text>
+        <Text style={styles.progressLabel}>
           {completedWatered} of {totalWatered} watered
         </Text>
       </View>
-      <Svg width={size} height={size}>
+      <Svg width={size} height={size} style={styles.progressRing}>
         <Circle
           cx={size / 2}
           cy={size / 2}
@@ -85,13 +85,18 @@ export default function HomeScreen() {
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
       <LinearGradient colors={["#1A8E2D", "#146922"]} style={styles.header}>
-        <View>
-          <View>
-            <View>
-              <Text>Daily Progress</Text>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTop}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.greetings}>Daily Progress</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity style={styles.notificationButton}>
               <Ionicons name="notifications-outline" size={24} color="white" />
+              {
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationCount}>1</Text>
+                </View>
+              }
             </TouchableOpacity>
           </View>
           <CircularProgress
@@ -106,18 +111,99 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#f8f9fa", 
-    },
-    header: {
-        paddingTop: 50,
-        paddingBottom: 25,
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-    },
-    headerContent: {
-        alignItems: "center",
-        paddingHorizontal: 20,
-    }
-})
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  header: {
+    paddingTop: 50,
+    paddingBottom: 25,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+
+  greetings: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "white",
+    opacity: 0.8,
+  },
+
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+
+  notificationButton: {
+    position: "relative",
+    padding: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+
+  notificationBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: "#ff5252",
+    borderRadius: 10,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    minWidth: 20,
+    borderColor: "#146922",
+  },
+
+  notificationCount: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "white",
+  },
+
+  progressDetail: {
+    fontSize: 11,
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  progressContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+
+  progressTextContainer: {
+    position: "absolute",
+    zIndex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  progressPercentage: {
+    fontSize: 14,
+    color: "white",
+    fontWeight: "bold",
+  },
+  progressLabel: {
+    fontSize: 14,
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  progressRing: {
+    transform: [{ rotate: "-90deg" }],
+  },
+});
