@@ -20,7 +20,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const QUICK_ACTIONS = [
   {
-    icon: "add-cricle-outline" as const,
+    icon: "add-circle-outline" as const,
     label: "Add\nPlant",
     route: "/plants/add" as const,
     color: "#2E7D32",
