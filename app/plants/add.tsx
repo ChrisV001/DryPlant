@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Switch,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -88,6 +89,8 @@ export default function AddFlower() {
     refillAt: "",
   });
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   const renderFrequencyOptions = () => {
     return (
       <View>
@@ -128,30 +131,50 @@ export default function AddFlower() {
     );
   };
   return (
-    <View>
+    <View style={styles.container}>
       <LinearGradient
         colors={["#1A8E2D", "146922"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}
       />
-      <View>
-        <View>
-          <TouchableOpacity>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton}>
             <Ionicons name="chevron-back" size={28} color={"#1A8E2D"} />
-            <Text>New Plant</Text>
+            <Text style={styles.headerTitle}>New Plant</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View>
-            <View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.formContentContainer}
+        >
+          <View style={styles.section}>
+            <View style={styles.inputContainer}>
               <TextInput
+                style={[styles.mainInput, errors.name && styles.inputError]}
                 placeholder="Plant name"
                 placeholderTextColor={"#999"}
-              ></TextInput>
+                value={form.name}
+                onChangeText={(text) => {
+                  setForm({ ...form, name: text });
+                  if (errors.name) {
+                    setErrors({ ...errors, name: "" });
+                  }
+                }}
+              />
+              {errors.name && (
+                <Text style={styles.errorText}>{errors.name}</Text>
+              )}
             </View>
-            <View>
-              <TextInput placeholder="Dosage" placeholderTextColor={"#999"} />
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Dosage"
+                placeholderTextColor={"#999"}
+                style={[styles.mainInput, errors.name && styles.inputError]}
+              />
             </View>
             <View>
               <Text>How often?</Text>
@@ -166,7 +189,11 @@ export default function AddFlower() {
                 </View>
                 <Text>Starts: {}</Text>
               </TouchableOpacity>
-              <DateTimePicker mode="date" value={form.startDay} />
+              <DateTimePicker
+                mode="date"
+                value={form.startDay}
+                display="default"
+              />
               <DateTimePicker
                 mode="time"
                 value={(() => {
@@ -175,6 +202,7 @@ export default function AddFlower() {
                   date.setHours(hours, minutes, 0, 0);
                   return date;
                 })()}
+                display="default"
               />
             </View>
             <View>
@@ -198,9 +226,119 @@ export default function AddFlower() {
                 </View>
               </View>
             </View>
+            {/* notes */}
+            <View>
+              <View>
+                <TextInput
+                  placeholder="Add notes if needed"
+                  placeholderTextColor={""}
+                />
+              </View>
+            </View>
           </View>
         </ScrollView>
+        <View>
+          <TouchableOpacity>
+            <LinearGradient
+              colors={["#1A8E2D", "#146922"]}
+              style={""}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={""}>
+                Add Flower
+                {/* {isSubmitting ? "Adding..." : "Add Flower"} */}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Text>Cancel</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === "ios" ? 140 : 120,
+  },
+  content: {
+    flex: 1,
+    paddingTop: Platform.OS === "ios" ? 50 : 30,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    zIndex: 1,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "white",
+    marginLeft: 15,
+  },
+  formContentContainer: {
+    padding: 20,
+  },
+  section: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  mainInput: {
+    fontSize: 20,
+    color: "#333",
+    padding: 15,
+  },
+  inputContainer: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputError: {
+    borderColor: "#FF5252",
+  },
+  errorText: {
+    color: "#FF5252",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 12,
+  },
+});
