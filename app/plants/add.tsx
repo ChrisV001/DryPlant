@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   Switch,
   Platform,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
+const { width } = Dimensions.get("window");
 
 const FREQUENCIES = [
   {
@@ -90,20 +93,30 @@ export default function AddFlower() {
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [selectedFrequency, setSelectedFrequency] = useState("");
 
   const renderFrequencyOptions = () => {
     return (
-      <View>
+      <View style={styles.optionsGrid}>
         {FREQUENCIES.map((freq) => (
           <TouchableOpacity
             key={freq.id}
             // onPress={}
+            style={[
+              styles.optionCard,
+              selectedFrequency === freq.label && styles.selectedOptionCard,
+            ]}
           >
-            <View>
+            <View
+              style={[
+                styles.optionIcon,
+                selectedFrequency === freq.label && styles.selectedOptionIcon,
+              ]}
+            >
               <Ionicons
                 name={freq.icon}
                 size={24}
-                //color={}
+                color={selectedFrequency === freq.label ? "white" : "#666"}
               />
               <Text>{freq.label}</Text>
             </View>
@@ -174,13 +187,29 @@ export default function AddFlower() {
                 placeholder="Dosage"
                 placeholderTextColor={"#999"}
                 style={[styles.mainInput, errors.name && styles.inputError]}
+                value={form.dosage}
+                onChangeText={(text) => {
+                  setForm({ ...form, dosage: text });
+                  if (errors.dosage) {
+                    setErrors({ ...errors, dosage: "" });
+                  }
+                }}
               />
+              {errors.dosage && (
+                <Text style={styles.errorText}>{errors.dosage}</Text>
+              )}
             </View>
-            <View>
-              <Text>How often?</Text>
+            <View style={styles.container}>
+              <Text style={styles.sectionTitle}>How often?</Text>
               {/* frequency option */}
+              {errors.frequency && (
+                <Text style={styles.errorText}>{errors.frequency}</Text>
+              )}
               {renderFrequencyOptions()}
-              <Text>For how long?</Text>
+              <Text style={styles.sectionTitle}>For how long?</Text>
+              {errors.duration && (
+                <Text style={styles.errorText}>{errors.duration}</Text>
+              )}
               {/* render duration */}
               {renderDurationOptions()}
               <TouchableOpacity>
@@ -340,5 +369,50 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     marginLeft: 12,
+  },
+  optionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -5,
+  },
+  optionCard: {
+    width: (width - 60) / 2,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 15,
+    margin: 5,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  selectedOptionCard: {
+    backgroundColor: "#1A8E2D",
+    borderColor: "#1A8E2D",
+  },
+  optionIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  selectedOptionIcon: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  optionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+  },
+  selectedOptionLabel: {
+    color: "white",
   },
 });
