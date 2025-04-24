@@ -83,7 +83,7 @@ export default function AddFlower() {
     dosage: "",
     frequency: "",
     duration: "",
-    startDay: new Date(),
+    startDate: new Date(),
     times: ["09:00"],
     notes: "",
     reminderEnabled: true,
@@ -94,6 +94,9 @@ export default function AddFlower() {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [selectedFrequency, setSelectedFrequency] = useState("");
+  const [selectedDuration, setSelectedDuration] = useState("");
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const renderFrequencyOptions = () => {
     return (
@@ -118,7 +121,15 @@ export default function AddFlower() {
                 size={24}
                 color={selectedFrequency === freq.label ? "white" : "#666"}
               />
-              <Text>{freq.label}</Text>
+              <Text
+                style={[
+                  styles.optionLabel,
+                  selectedFrequency === freq.label &&
+                    styles.selectedOptionLabel,
+                ]}
+              >
+                {freq.label}
+              </Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -128,16 +139,34 @@ export default function AddFlower() {
 
   const renderDurationOptions = () => {
     return (
-      <View>
+      <View style={styles.optionsGrid}>
         {DURATIONS.map((duration) => (
           <TouchableOpacity
             key={duration.id}
             //onPress={}
+            style={[
+              styles.optionCard,
+              selectedDuration === duration.label && styles.selectedOptionCard,
+            ]}
           >
-            <View>
-              <Text>{duration.value > 0 ? duration.value : "∞"}</Text>
-              <Text>{duration.label}</Text>
-            </View>
+            <Text
+              style={[
+                styles.durationNumber,
+                selectedDuration === duration.label &&
+                  styles.selectedDurationNumber,
+              ]}
+            >
+              {duration.value > 0 ? duration.value : "∞"}
+            </Text>
+            <Text
+              style={[
+                styles.optionLabel,
+                selectedDuration === duration.label &&
+                  styles.selectedOptionLabel,
+              ]}
+            >
+              {duration.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -212,25 +241,48 @@ export default function AddFlower() {
               )}
               {/* render duration */}
               {renderDurationOptions()}
-              <TouchableOpacity>
-                <View>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <View style={styles.dateIconContainer}>
                   <Ionicons name="calendar" size={20} color={"1A8E2D"} />
                 </View>
-                <Text>Starts: {}</Text>
+                <Text style={styles.dateButtonText}>
+                  Starts: {form.startDate.toLocaleDateString()}
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color={"#666"} />
               </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={form.startDate}
+                  mode="date"
+                  onChange={(event, date) => {
+                    setShowDatePicker(false);
+                    if (date) setForm({ ...form, startDate: date });
+                  }}
+                />
+              )}
+              {showTimePicker && (
+                <DateTimePicker
+                  mode="time"
+                  value={(() => {
+                    const [hours, minutes] = form.times[0]
+                      .split(":")
+                      .map(Number);
+                    const date = new Date();
+                    date.setHours(hours, minutes, 0, 0);
+                    return date;
+                  })()}
+                  display="default"
+                  onChange={(event, date) => {
+                    setShowTimePicker(false);
+                  }}
+                />
+              )}
               <DateTimePicker
                 mode="date"
-                value={form.startDay}
-                display="default"
-              />
-              <DateTimePicker
-                mode="time"
-                value={(() => {
-                  const [hours, minutes] = form.times[0].split(":").map(Number);
-                  const date = new Date();
-                  date.setHours(hours, minutes, 0, 0);
-                  return date;
-                })()}
+                value={form.startDate}
                 display="default"
               />
             </View>
@@ -414,5 +466,43 @@ const styles = StyleSheet.create({
   },
   selectedOptionLabel: {
     color: "white",
+  },
+  durationNumber: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1A8E2D",
+    marginBottom: 5,
+  },
+  selectedDurationNumber: {
+    color: "white",
+  },
+  dateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 15,
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  dateIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  dateButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
   },
 });
