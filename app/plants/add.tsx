@@ -263,6 +263,36 @@ export default function AddFlower() {
                   }}
                 />
               )}
+
+              {form.frequency && form.frequency !== "As needed" && (
+                <View style={styles.timeContainer}>
+                  <Text style={styles.timesTitle}>Watering Time</Text>
+                  {form.times.map((time, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.timeButton}
+                      onPress={() => {
+                        setShowDatePicker(true);
+                      }}
+                    >
+                      <View style={styles.timeIconContainer}>
+                        <Ionicons
+                          name="time-outline"
+                          size={20}
+                          color={"#1A8E2D"}
+                        />
+                      </View>
+                      <Text style={styles.timeButtonText}>{time}</Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={"#666"}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
               {showTimePicker && (
                 <DateTimePicker
                   mode="time"
@@ -277,6 +307,19 @@ export default function AddFlower() {
                   display="default"
                   onChange={(event, date) => {
                     setShowTimePicker(false);
+                    if (date) {
+                      const newTime = date.toLocaleDateString("default", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      });
+                      setForm((prev) => ({
+                        ...prev,
+                        times: prev.times.map((t, i) =>
+                          i === 0 ? newTime : t
+                        ),
+                      }));
+                    }
                   }}
                 />
               )}
@@ -286,31 +329,37 @@ export default function AddFlower() {
                 display="default"
               />
             </View>
-            <View>
-              <View>
-                <View>
-                  <View>
-                    <View>
+            {/* Reminders */}
+            <View style={styles.section}>
+              <View style={styles.card}>
+                <View style={styles.switchRow}>
+                  <View style={styles.switchLabelContainer}>
+                    <View style={styles.iconContainer}>
                       <Ionicons name="notifications" color={"#1A8E2D"} />
                     </View>
                     <View>
-                      <Text>Reminders</Text>
-                      <Text>
+                      <Text style={styles.switchLabel}>Reminders</Text>
+                      <Text style={styles.switchSubLabel}>
                         Get notified when it is time to water the plant
                       </Text>
                     </View>
                   </View>
                   <Switch
+                    value={form.reminderEnabled}
                     thumbColor={"white"}
                     trackColor={{ false: "#ddd", true: "#1A8E2D" }}
+                    onValueChange={(value) => 
+                      setForm({...form,reminderEnabled:value})
+                    }
                   />
                 </View>
               </View>
             </View>
             {/* notes */}
-            <View>
-              <View>
+            <View style={styles.section}>
+              <View style={styles.textAreaContainer}>
                 <TextInput
+                  style={styles.textArea}
                   placeholder="Add notes if needed"
                   placeholderTextColor={""}
                 />
@@ -501,6 +550,45 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   dateButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  timeContainer: {
+    marginTop: 20,
+  },
+  timesTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 10,
+  },
+
+  timeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 15,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  timeIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  timeButtonText: {
     flex: 1,
     fontSize: 16,
     color: "#333",
