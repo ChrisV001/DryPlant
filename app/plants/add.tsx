@@ -9,10 +9,12 @@ import {
   Switch,
   Platform,
   Dimensions,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -97,7 +99,9 @@ export default function AddFlower() {
   const [selectedDuration, setSelectedDuration] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const router = useRouter();
   const renderFrequencyOptions = () => {
     return (
       <View style={styles.optionsGrid}>
@@ -172,6 +176,85 @@ export default function AddFlower() {
       </View>
     );
   };
+
+  const validateForm = () => {
+    const newError: { [key: string]: string } = {};
+
+    if (!form.name.trim()) {
+      newError.name = "Plant name is required!";
+    }
+
+    if (!form.dosage.trim()) {
+      newError.dosage = "Dosage is required!";
+    }
+
+    if (!form.frequency) {
+      newError.frequency = "Frequency is required!";
+    }
+
+    if (!form.duration) {
+      newError.duration = "Duration is required!";
+    }
+
+    setErrors(newError);
+    return Object.keys(newError).length === 0;
+  };
+
+  const handleSave = async () => {
+    try {
+      if (!validateForm()) {
+        Alert.alert("Error, please fill all the required fields.");
+        return;
+      }
+
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+
+      //Generate random color
+      const colors = ["#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0"];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+      const flowerData = {
+        id: Math.random().toString(36).substring(2, 9),
+        ...form,
+        currentSupply: form.currentSupply ? Number(form.currentSupply) : 0,
+        totalSupply: form.currentSupply ? Number(form.currentSupply) : 0,
+        refillAt: form.refillAt ? Number(form.refillAt) : 0,
+        startDate: form.startDate.toISOString(),
+        color: randomColor,
+      };
+
+      await addFlower(flowerData);
+
+      // We will schedule reminders if they are enabled.
+      if (flowerData.reminderEnabled) {
+        await scheduleFlowerReminder(flowerData);
+      }
+
+      Alert.alert(
+        "Success",
+        "Flower added successfully",
+        [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (error) {
+      console.error("Save error: ", error);
+      Alert.alert(
+        "Error",
+        "Failed to save flower. Please try again.",
+        [{ text: "OK" }],
+        { cancelable: false }
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -348,8 +431,8 @@ export default function AddFlower() {
                     value={form.reminderEnabled}
                     thumbColor={"white"}
                     trackColor={{ false: "#ddd", true: "#1A8E2D" }}
-                    onValueChange={(value) => 
-                      setForm({...form,reminderEnabled:value})
+                    onValueChange={(value) =>
+                      setForm({ ...form, reminderEnabled: value })
                     }
                   />
                 </View>
@@ -361,28 +444,42 @@ export default function AddFlower() {
                 <TextInput
                   style={styles.textArea}
                   placeholder="Add notes if needed"
-                  placeholderTextColor={""}
+                  placeholderTextColor={"#999"}
+                  value={form.notes}
+                  onChangeText={(text) => setForm({ ...form, notes: text })}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
                 />
               </View>
             </View>
           </View>
         </ScrollView>
-        <View>
-          <TouchableOpacity>
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[
+              styles.saveButton,
+              isSubmitting && styles.saveButtonDisabled,
+            ]}
+          >
             <LinearGradient
               colors={["#1A8E2D", "#146922"]}
-              style={""}
+              style={styles.saveButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={""}>
+              <Text style={styles.saveButtonText}>
                 Add Flower
-                {/* {isSubmitting ? "Adding..." : "Add Flower"} */}
+                {isSubmitting ? "Adding..." : "Add Flower"}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Text>Cancel</Text>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => router.back()}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -592,5 +689,101 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: "#333",
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  switchRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  switchLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  switchLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  switchSubLabel: {
+    fontSize: 13,
+    color: "#666",
+    marginTop: 2,
+  },
+  textAreaContainer: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  textArea: {
+    height: 100,
+    padding: 15,
+    fontSize: 16,
+    color: "#333",
+  },
+  footer: {
+    padding: 20,
+    backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+  },
+  saveButton: {
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
+  saveButtonGradient: {
+    paddingVertical: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  saveButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  cancelButton: {
+    paddingVertical: 15,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
+  cancelButtonText: {
+    color: "#666",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
