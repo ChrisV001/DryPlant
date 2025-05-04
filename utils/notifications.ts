@@ -102,3 +102,15 @@ export async function cancelWateringReminders(flowerId: string): Promise<void> {
     return undefined;
   }
 }
+
+export async function updateWateringReminders(
+  flower: Flower
+): Promise<void> {
+  try {
+    await cancelWateringReminders(flower.id);
+
+    await scheduleWateringReminder(flower);
+  } catch (error) {
+    console.error("Error updating watering reminder: ",error);
+  }
+}

@@ -15,6 +15,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
+import { addFlower } from "@/utils/storage";
+import { scheduleWateringReminder } from "@/utils/notifications";
 
 const { width } = Dimensions.get("window");
 
@@ -108,7 +110,10 @@ export default function AddFlower() {
         {FREQUENCIES.map((freq) => (
           <TouchableOpacity
             key={freq.id}
-            // onPress={}
+            onPress={() => {
+              setSelectedFrequency(freq.label);
+              setForm({ ...form, frequency: freq.label });
+            }}
             style={[
               styles.optionCard,
               selectedFrequency === freq.label && styles.selectedOptionCard,
@@ -147,7 +152,10 @@ export default function AddFlower() {
         {DURATIONS.map((duration) => (
           <TouchableOpacity
             key={duration.id}
-            //onPress={}
+            onPress={() => {
+              setSelectedDuration(duration.label);
+              setForm({ ...form, duration: duration.label });
+            }}
             style={[
               styles.optionCard,
               selectedDuration === duration.label && styles.selectedOptionCard,
@@ -228,7 +236,7 @@ export default function AddFlower() {
 
       // We will schedule reminders if they are enabled.
       if (flowerData.reminderEnabled) {
-        await scheduleFlowerReminder(flowerData);
+        await scheduleWateringReminder(flowerData);
       }
 
       Alert.alert(
@@ -461,6 +469,7 @@ export default function AddFlower() {
               styles.saveButton,
               isSubmitting && styles.saveButtonDisabled,
             ]}
+            onPress={() => handleSave()}
           >
             <LinearGradient
               colors={["#1A8E2D", "#146922"]}

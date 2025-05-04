@@ -11,7 +11,7 @@ export interface Flower {
   startDate: string;
   duration: string;
   color: string;
-  reminder: boolean;
+  reminder?: boolean;
   currentSupply: number;
   totalSupply: number;
   refillAt: number;
