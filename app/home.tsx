@@ -8,11 +8,17 @@ import {
   ScrollView,
   Animated,
   Dimensions,
-  Modal
+  Modal,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { StyleSheet } from "react-native";
 import { Link, useRouter } from "expo-router";
+import {
+  DoseHistory,
+  Flower,
+  getFlowers,
+  getTodaysDoses,
+} from "@/utils/storage";
 
 const { width } = Dimensions.get("window");
 
@@ -115,6 +121,51 @@ function CircularProgress({
 }
 
 export default function HomeScreen() {
+  const [todaysWatering, setTodaysWatering] = useState<Flower[]>([]);
+  const [completedWatering, setCompletedWatering] = useState(0);
+  const [wateringHistory, setWateringHistory] = useState<DoseHistory[]>([]);
+  const [flowers, setFlowers] = useState<Flower[]>([]);
+
+  const loadWatering = useCallback(async () => {
+    try {
+      const [allFlowers, todaysWatering] = await Promise.all([
+        getFlowers(),
+        getTodaysDoses(),
+      ]);
+
+      setWateringHistory(todaysWatering);
+      setFlowers(allFlowers);
+
+      const today = new Date();
+
+      const todayWatering = allFlowers.filter((watering) => {
+        const startDate = new Date(watering.startDate);
+        const durationDays = parseInt(watering.duration.split(" ")[0]);
+
+        if (
+          durationDays === -1 ||
+          (today >= startDate &&
+            today <=
+              new Date(
+                startDate.getTime() + durationDays * 24 * 60 * 60 * 1000
+              ))
+        ) {
+          return true;
+        }
+        return false;
+      });
+
+      setTodaysWatering(todayWatering);
+
+      const completed = todaysWatering.filter(
+        (watering) => watering.watered
+      ).length;
+
+      setCompletedWatering(completed);
+    } catch (error) {
+      console.error("Error loading watering: ", error);
+    }
+  }, []);
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
       <LinearGradient colors={["#1A8E2D", "#146922"]} style={styles.header}>
