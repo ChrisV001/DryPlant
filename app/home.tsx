@@ -10,6 +10,7 @@ import {
   Dimensions,
   Modal,
   AppState,
+  Alert,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { StyleSheet } from "react-native";
@@ -19,11 +20,13 @@ import {
   Flower,
   getFlowers,
   getTodaysDoses,
+  recordDose,
 } from "@/utils/storage";
 import {
   registerForPushNotificationAsync,
   scheduleWateringReminder,
 } from "@/utils/notifications";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -198,14 +201,38 @@ export default function HomeScreen() {
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "active") {
-        loadWatering()
+        loadWatering();
       }
     });
 
     return () => {
       subscription.remove();
-    }
+    };
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = () => {};
+      loadWatering();
+      return () => unsubscribe();
+    }, [loadWatering])
+  );
+
+  const handleTakeDose = async (flower: Flower) => {
+    try {
+      await recordDose(flower.id, true, new Date().toISOString());
+      await loadWatering();
+    } catch (error) {
+      console.log("Error recording dose: ", error);
+      Alert.alert("Error", "Failed to record dose. Please try again.");
+    }
+  };
+
+  const isDoseTaken = (flowerId: string) => {
+    return wateringHistory.some(
+      (watering) => watering.flowerId === flowerId && watering.watered
+    );
+  }
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
