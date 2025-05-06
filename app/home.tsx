@@ -9,6 +9,7 @@ import {
   Animated,
   Dimensions,
   Modal,
+  AppState,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { StyleSheet } from "react-native";
@@ -19,6 +20,10 @@ import {
   getFlowers,
   getTodaysDoses,
 } from "@/utils/storage";
+import {
+  registerForPushNotificationAsync,
+  scheduleWateringReminder,
+} from "@/utils/notifications";
 
 const { width } = Dimensions.get("window");
 
@@ -166,6 +171,42 @@ export default function HomeScreen() {
       console.error("Error loading watering: ", error);
     }
   }, []);
+
+  const setUpNotifications = async () => {
+    try {
+      const token = await registerForPushNotificationAsync();
+      if (!token) {
+        console.log("Failed to push notification token");
+        return;
+      }
+
+      const flowers = await getFlowers();
+      flowers.forEach(async (flower) => {
+        if (flower.reminder) {
+          await scheduleWateringReminder(flower);
+        }
+      });
+    } catch (error) {
+      console.error("Error setting up notifications: ", error);
+      return;
+    }
+  };
+
+  useEffect(() => {
+    loadWatering();
+    setUpNotifications();
+
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        loadWatering()
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    }
+  });
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
       <LinearGradient colors={["#1A8E2D", "#146922"]} style={styles.header}>
