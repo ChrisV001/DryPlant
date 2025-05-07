@@ -232,7 +232,10 @@ export default function HomeScreen() {
     return wateringHistory.some(
       (watering) => watering.flowerId === flowerId && watering.watered
     );
-  }
+  };
+
+  const progress =
+    todaysWatering.length > 0 ? completedWatering / todaysWatering.length : 0;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -252,9 +255,9 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <CircularProgress
-            progress={50}
-            totalWatered={10}
-            completedWatered={5}
+            progress={progress}
+            totalWatered={todaysWatering.length}
+            completedWatered={completedWatering}
           />
         </View>
       </LinearGradient>
@@ -291,7 +294,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </Link>
         </View>
-        {true ? (
+        {todaysWatering.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="water-outline" size={48} color="#ccc" />
             <Text style={styles.emptyStateText}>
@@ -304,23 +307,29 @@ export default function HomeScreen() {
             </Link>
           </View>
         ) : (
-          [].map((plant) => {
+          todaysWatering.map((plant) => {
+            const taken = isDoseTaken(plant.id);
             return (
               <View style={styles.flowerCard}>
-                <View style={[styles.waterBade]}>
+                <View
+                  style={[
+                    styles.waterBade,
+                    { backgroundColor: `${plant.color}15` },
+                  ]}
+                >
                   <View>
                     <Ionicons name="plant-outline" size={24} />
                   </View>
                   <View style={styles.waterInfo}>
-                    <Text style={styles.flowerName}>name</Text>
-                    <Text style={styles.wateredInfo}>water dosage</Text>
+                    <Text style={styles.flowerName}>{plant.name}</Text>
+                    <Text style={styles.wateredInfo}>{plant.dosage}</Text>
                   </View>
                   <View style={styles.wateredTime}>
                     <Ionicons name="time-outline" size={16} color="#ccc" />
-                    <Text style={styles.timeText}>time</Text>
+                    <Text style={styles.timeText}>{plant.times}</Text>
                   </View>
                 </View>
-                {true ? (
+                {taken ? (
                   <View style={styles.waterButton}>
                     <Ionicons name="checkmark-circle-outline" size={24} />
                     <Text style={styles.addFlowerButtonText}>Watered</Text>
