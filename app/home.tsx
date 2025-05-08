@@ -133,6 +133,7 @@ export default function HomeScreen() {
   const [completedWatering, setCompletedWatering] = useState(0);
   const [wateringHistory, setWateringHistory] = useState<DoseHistory[]>([]);
   const [flowers, setFlowers] = useState<Flower[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const loadWatering = useCallback(async () => {
     try {
@@ -245,7 +246,8 @@ export default function HomeScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.greetings}>Daily Progress</Text>
             </View>
-            <TouchableOpacity style={styles.notificationButton}>
+            <TouchableOpacity style={styles.notificationButton}
+            onPress={() => setShowNotifications(true)}>
               <Ionicons name="notifications-outline" size={24} color="white" />
               {
                 <View style={styles.notificationBadge}>
@@ -335,7 +337,13 @@ export default function HomeScreen() {
                     <Text style={styles.addFlowerButtonText}>Watered</Text>
                   </View>
                 ) : (
-                  <TouchableOpacity style={styles.waterButton}>
+                  <TouchableOpacity
+                    style={[
+                      styles.waterButton,
+                      { backgroundColor: plant.color },
+                    ]}
+                    onPress={() => handleTakeDose(plant)}
+                  >
                     <Text style={styles.waterText}>Water</Text>
                   </TouchableOpacity>
                 )}
@@ -345,25 +353,31 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <Modal visible={false} transparent={true} animationType="slide">
+      <Modal
+        visible={false}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowNotifications(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Notification</Text>
-            <TouchableOpacity style={styles.closeButton}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowNotifications(false)}
+            >
               <Ionicons name="close" size={24} color="#333" />
             </TouchableOpacity>
           </View>
-          {[].map((plant) => (
+          {todaysWatering.map((plant) => (
             <View style={styles.notificationItem}>
               <View style={styles.notificationIcon}>
                 <Ionicons name="plant-outline" size={24} />
               </View>
               <View style={styles.notificationContent}>
-                <Text style={styles.notificationTitle}>plant name</Text>
-                <Text style={styles.notificationMessage}>
-                  plant water dosage
-                </Text>
-                <Text style={styles.notificationTime}>plant time</Text>
+                <Text style={styles.notificationTitle}>{plant.name}</Text>
+                <Text style={styles.notificationMessage}>{plant.dosage}</Text>
+                <Text style={styles.notificationTime}>{plant.times[0]}</Text>
               </View>
             </View>
           ))}
