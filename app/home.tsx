@@ -246,8 +246,10 @@ export default function HomeScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.greetings}>Daily Progress</Text>
             </View>
-            <TouchableOpacity style={styles.notificationButton}
-            onPress={() => setShowNotifications(true)}>
+            <TouchableOpacity
+              style={styles.notificationButton}
+              onPress={() => setShowNotifications(true)}
+            >
               <Ionicons name="notifications-outline" size={24} color="white" />
               {
                 <View style={styles.notificationBadge}>
