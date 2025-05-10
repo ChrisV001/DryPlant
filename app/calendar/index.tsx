@@ -17,6 +17,7 @@ import {
   Flower,
   DoseHistory,
 } from "@/utils/storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -39,6 +40,56 @@ export default function CalendarScreen() {
       console.error("Error loading calendar data: ", error);
     }
   }, [selectedDate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
+
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const days = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    return { days, firstDay };
+  };
+
+  const { days, firstDay } = getDaysInMonth(selectedDate);
+
+  const renderCalendar = () => {
+    const calendar: JSX.Element[] = [];
+    let week: JSX.Element[] = [];
+
+    for (let i = 0; i < firstDay; i++) {
+      week.push(<View key={`empty-${i}`} />);
+    }
+
+    for (let day = 1; day <= days; day++) {
+      const date = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth()
+      );
+
+      const today = new Date().toDateString() === date.toDateString();
+      const hasDoses = doseHistory.some(
+        (dose) =>
+          new Date(dose.timestamp).toDateString() === date.toDateString()
+      );
+
+      week.push(
+        <TouchableOpacity key={day}>
+          <Text>{day}</Text>
+          {hasDoses && <View></View>}
+        </TouchableOpacity>
+      );
+
+      if (firstDay + (day % 7) === 0 || day === days) {
+        calendar.push(<View key={day}>{week}</View>);
+      }
+    }
+  };
+
   return (
     <View>
       <LinearGradient
