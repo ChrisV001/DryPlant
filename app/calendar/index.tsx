@@ -86,8 +86,44 @@ export default function CalendarScreen() {
 
       if (firstDay + (day % 7) === 0 || day === days) {
         calendar.push(<View key={day}>{week}</View>);
+        week = [];
       }
     }
+
+    return calendar;
+  };
+
+  const renderFlowersForDate = () => {
+    const dateStr = selectedDate.toDateString();
+    const dayDoses = doseHistory.filter(
+      (dose) => new Date(dose.timestamp).toDateString() === dateStr
+    );
+
+    return flowers.map((flower) => {
+      const watered = dayDoses.some(
+        (dose) => dose.flowerId === flower.id && dose.watered
+      );
+      return (
+        <View>
+          <View />
+          <View>
+            <Text>{flower.name}FlowerName</Text>
+            <Text>{flower.dosage}FlowerDosage</Text>
+            <Text>{flower.times[0]}FlowerTimes</Text>
+          </View>
+          {watered && ? (
+            <View>
+              <Ionicons name="checkmark-circle" size={20} color={"#4CAF50"} />
+              <Text>Watered</Text>
+            </View>
+          ) : (
+            <TouchableOpacity>
+              
+            </TouchableOpacity>
+          )}
+        </View>
+      );
+    });
   };
 
   return (
