@@ -111,14 +111,19 @@ export default function CalendarScreen() {
             <Text>{flower.dosage}FlowerDosage</Text>
             <Text>{flower.times[0]}FlowerTimes</Text>
           </View>
-          {watered && ? (
+          {watered ? (
             <View>
               <Ionicons name="checkmark-circle" size={20} color={"#4CAF50"} />
               <Text>Watered</Text>
             </View>
           ) : (
-            <TouchableOpacity>
-              
+            <TouchableOpacity
+              onPress={async () => {
+                await recordDose(flower.id, true, new Date().toISOString());
+                loadData();
+              }}
+            >
+              <Text>Water</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -127,15 +132,19 @@ export default function CalendarScreen() {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <LinearGradient
+        style={styles.headerGradient}
         colors={["#1A8E2D", "#146922"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       />
-      <View>
-        <View>
-          <TouchableOpacity>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="chevron-back" size={28} color={"#1A8E2D"} />
           </TouchableOpacity>
           <Text>
@@ -148,6 +157,7 @@ export default function CalendarScreen() {
             <Ionicons name="chevron-forward" size={28} color={"#1A8E2D"} />
           </TouchableOpacity>
         </View>
+        <Text style={styles.headerTitle}>Calendar</Text>
         <View>
           {WEEKDAYS.map((day) => (
             <Text key={day}>day</Text>
@@ -170,3 +180,47 @@ export default function CalendarScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: Platform.OS === "ios" ? 140 : 120,
+  },
+  content: {
+    flex: 1,
+    paddingTop: Platform.OS === "ios" ? 50 : 30,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    zIndex: 1,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "white",
+    marginLeft: 15,
+  },
+});
