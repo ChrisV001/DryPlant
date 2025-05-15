@@ -78,14 +78,26 @@ export default function CalendarScreen() {
       );
 
       week.push(
-        <TouchableOpacity key={day}>
-          <Text>{day}</Text>
-          {hasDoses && <View></View>}
+        <TouchableOpacity
+          key={day}
+          style={[
+            styles.calendarDay,
+            today && styles.today,
+            hasDoses && styles.hasEvents,
+          ]}
+          onPress={() => setSelectedDate(date)}
+        >
+          <Text style={[styles.dayText, today && styles.todayText]}>{day}</Text>
+          {hasDoses && <View style={styles.eventDot} />}
         </TouchableOpacity>
       );
 
-      if (firstDay + (day % 7) === 0 || day === days) {
-        calendar.push(<View key={day}>{week}</View>);
+      if ((firstDay + day) % 7 === 0 || day === days) {
+        calendar.push(
+          <View key={day} style={styles.calendarWeek}>
+            {week}
+          </View>
+        );
         week = [];
       }
     }
@@ -104,17 +116,19 @@ export default function CalendarScreen() {
         (dose) => dose.flowerId === flower.id && dose.watered
       );
       return (
-        <View>
-          <View />
-          <View>
-            <Text>{flower.name}FlowerName</Text>
-            <Text>{flower.dosage}FlowerDosage</Text>
-            <Text>{flower.times[0]}FlowerTimes</Text>
+        <View key={flower.id} style={styles.flowerCard}>
+          <View
+            style={[styles.flowerColor, { backgroundColor: flower.color }]}
+          />
+          <View style={styles.flowerInfo}>
+            <Text style={styles.flowerName}>{flower.name}</Text>
+            <Text style={styles.flowerDosage}>{flower.dosage}</Text>
+            <Text style={styles.flowerTime}>{flower.times[0]}</Text>
           </View>
           {watered ? (
-            <View>
+            <View style={styles.wateredBadge}>
               <Ionicons name="checkmark-circle" size={20} color={"#4CAF50"} />
-              <Text>Watered</Text>
+              <Text style={styles.wateredText}>Watered</Text>
             </View>
           ) : (
             <TouchableOpacity
@@ -122,8 +136,12 @@ export default function CalendarScreen() {
                 await recordDose(flower.id, true, new Date().toISOString());
                 loadData();
               }}
+              style={[
+                styles.wateredDoseButton,
+                { backgroundColor: flower.color },
+              ]}
             >
-              <Text>Water</Text>
+              <Text style={styles.wateredDoseText}>Water</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -301,5 +319,101 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#666",
     fontWeight: "500",
+  },
+  calendarDay: {
+    flex: 1,
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+  },
+  today: {
+    backgroundColor: "#1a8e2d15",
+  },
+  todayText: {
+    color: "#1a8e2d",
+    fontWeight: "600",
+  },
+  hasEvents: {
+    position: "relative",
+  },
+  dayText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  eventDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#1a8e2d",
+    position: "absolute",
+    bottom: "15%",
+  },
+  calendarWeek: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  flowerCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 15,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  flowerColor: {
+    width: 12,
+    height: 40,
+    borderRadius: 6,
+    marginRight: 15,
+  },
+  flowerInfo: {
+    flex: 1,
+  },
+  flowerName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  flowerDosage: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 2,
+  },
+  flowerTime: {
+    fontSize: 14,
+    color: "#666",
+  },
+  wateredBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E8F5E9",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  wateredText: {
+    color: "#4CAF50",
+    fontWeight: "600",
+    fontSize: 14,
+    marginLeft: 4,
+  },
+  wateredDoseButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+  },
+  wateredDoseText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });
