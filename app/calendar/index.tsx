@@ -147,33 +147,62 @@ export default function CalendarScreen() {
           >
             <Ionicons name="chevron-back" size={28} color={"#1A8E2D"} />
           </TouchableOpacity>
-          <Text>
-            {selectedDate.toLocaleString("default", {
-              month: "long",
-              year: "numeric",
-            })}
-          </Text>
-          <TouchableOpacity>
-            <Ionicons name="chevron-forward" size={28} color={"#1A8E2D"} />
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Calendar</Text>
         </View>
-        <Text style={styles.headerTitle}>Calendar</Text>
-        <View>
-          {WEEKDAYS.map((day) => (
-            <Text key={day}>day</Text>
-          ))}
+        <View style={styles.calendarContainer}>
+          <View style={styles.monthHeader}>
+            <TouchableOpacity
+              onPress={() =>
+                setSelectedDate(
+                  new Date(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth() - 1,
+                    1
+                  )
+                )
+              }
+            >
+              <Ionicons name="chevron-back" size={24} color={"#333"} />
+            </TouchableOpacity>
+            <Text style={styles.monthText}>
+              {selectedDate.toLocaleString("default", {
+                month: "long",
+                year: "numeric",
+              })}
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                setSelectedDate(
+                  new Date(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth() + 1,
+                    1
+                  )
+                )
+              }
+            >
+              <Ionicons name="chevron-forward" size={24} color={"#333"} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.weekdayHeader}>
+            {WEEKDAYS.map((day) => (
+              <Text key={day} style={styles.weekdayText}>
+                {day}
+              </Text>
+            ))}
+          </View>
+          {renderCalendar()}
         </View>
-        {/* Render the calendar */}
-        <View>
-          <Text>
+        <View style={styles.scheduleContainer}>
+          <Text style={styles.scheduleTitle}>
             {selectedDate.toLocaleDateString("default", {
               weekday: "long",
               month: "long",
               day: "numeric",
             })}
           </Text>
-          <ScrollView>
-            {/* Flowers that need to be watered for the given date */}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {renderFlowersForDate()}
           </ScrollView>
         </View>
       </View>
@@ -222,5 +251,55 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "white",
     marginLeft: 15,
+  },
+  calendarContainer: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    margin: 20,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  monthHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  monthText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  weekdayHeader: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  scheduleContainer: {
+    flex: 1,
+    backgroundColor: "white",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  scheduleTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 15,
+  },
+  weekdayText: {
+    flex: 1,
+    textAlign: "center",
+    color: "#666",
+    fontWeight: "500",
   },
 });
