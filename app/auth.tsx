@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -18,6 +19,12 @@ export default function AuthScreen() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>("");
   const router = useRouter();
+
+  useEffect(() => {
+    if (Platform.OS === "web") {
+      router.replace("/home");
+    }
+  }, []);
 
   const checkBiometrics = async () => {
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
